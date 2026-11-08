@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eduzy - Admin Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#FAF5FF', 100: '#F3E8FF', 200: '#E9D5FF', 300: '#D8B4FE', 400: '#C084FC', 500: '#A855F7', 600: '#9333EA', 700: '#7C3AED', 800: '#6B46C1', 900: '#581C87' },
+                        accent: { 50: '#EBF8FF', 100: '#BEE3F8', 200: '#90CDF4', 300: '#63B3ED', 400: '#4299E1', 500: '#3182CE', 600: '#2B6CB0', 700: '#2C5282' },
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F7FAFC; }
+        .page-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page-section.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Shimmer */
+        .skeleton {
+            background: #eee;
+            background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+            border-radius: 5px;
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+        }
+        @keyframes shine {
+            to { background-position-x: -200%; }
+        }
+        
+        /* Toast */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            min-width: 250px;
+            padding: 16px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        /* Modal */
+        #modal-overlay {
+            display: none;
+            backdrop-filter: blur(4px);
+        }
+        #modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        
+        .progress-bar-container { width: 100px; height: 6px; background-color: #EDF2F7; border-radius: 4px; overflow: hidden; }
+        .progress-bar { height: 100%; border-radius: 4px; }
+    </style>
+</head>
+<body class="text-gray-800 h-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-[260px] bg-white border-r border-gray-200 flex flex-col h-full flex-shrink-0 transition-all duration-300 z-20 hidden md:flex">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-gray-100">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white mr-3 shadow-md">
+                <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xl font-bold tracking-tight text-gray-900">Eduzy</span>
+        </div>
+        
+        <!-- Menu -->
+        <div class="flex-1 overflow-y-auto py-6 px-4">
+            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">Admin Portal</div>
+            <nav class="space-y-1">
+                <a href="#" data-target="dashboard-page" class="nav-item flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-primary-600 bg-primary-50 text-primary-700 font-medium cursor-pointer">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i> Dashboard
+                </a>
+                <a href="#" data-target="departments-page" class="nav-item flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium cursor-pointer">
+                    <i data-lucide="building-2" class="w-5 h-5 mr-3"></i> Departments
+                </a>
+                <a href="#" data-target="faculty-page" class="nav-item flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium cursor-pointer">
+                    <i data-lucide="users" class="w-5 h-5 mr-3"></i> Faculty
+                </a>
+                <a href="#" class="flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium cursor-pointer">
+                    <i data-lucide="book-open" class="w-5 h-5 mr-3"></i> Courses
+                </a>
+                <a href="#" data-target="students-page" class="nav-item flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium cursor-pointer">
+                    <i data-lucide="graduation-cap" class="w-5 h-5 mr-3"></i> Students
+                </a>
+                <a href="#" class="flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium cursor-pointer">
+                    <i data-lucide="calendar-check" class="w-5 h-5 mr-3"></i> Attendance
+                </a>
+                <a href="#" class="flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium cursor-pointer">
+                    <i data-lucide="clock" class="w-5 h-5 mr-3"></i> Timetable
+                </a>
+                <a href="#" class="flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium cursor-pointer">
+                    <i data-lucide="megaphone" class="w-5 h-5 mr-3"></i> Notices
+                </a>
+                <a href="#" class="flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium cursor-pointer">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5 mr-3"></i> Reports
+                </a>
+                <a href="#" class="flex items-center px-3 py-2.5 rounded-lg mb-1 transition-all duration-200 border-l-[3px] border-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 font-medium cursor-pointer">
+                    <i data-lucide="settings" class="w-5 h-5 mr-3"></i> Settings
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Bottom -->
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex items-center text-sm text-gray-600">
+                    <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                    Academic Support
+                </div>
+            </div>
+            <a href="#" class="flex items-center px-3 py-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors font-medium cursor-pointer">
+                <i data-lucide="log-out" class="w-5 h-5 mr-3"></i> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
+            <div class="flex items-center flex-1">
+                <button id="mobile-menu-btn" class="md:hidden mr-4 text-gray-500 hover:text-gray-700">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="relative w-full max-w-md hidden sm:block">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" placeholder="Search departments, faculty, students..." class="w-full bg-gray-100 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow">
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-center justify-center flex-1 hidden lg:flex">
+                <div class="bg-accent-100 text-accent-700 text-xs font-semibold px-3 py-1 rounded-full border border-accent-200 shadow-sm flex items-center">
+                    <i data-lucide="calendar" class="w-3 h-3 mr-1"></i> Fall 2024 • Sem 5
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-end flex-1 gap-4">
+                <button class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+                </button>
+                <div class="h-8 w-px bg-gray-200 mx-1"></div>
+                <div class="flex items-center cursor-pointer relative group">
+                    <img src="https://ui-avatars.com/api/?name=Dr.+Admin&background=6B46C1&color=fff" alt="Profile" class="w-9 h-9 rounded-full shadow-sm border border-gray-200">
+                    <div class="ml-3 hidden sm:block mr-2">
+                        <div class="text-sm font-semibold text-gray-800 leading-tight">Dr. Admin</div>
+                        <div class="text-xs text-gray-500">Administrator</div>
+                    </div>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                    
+                    <!-- Dropdown -->
+                    <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 hidden group-hover:block z-50">
+                        <div class="py-1">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Sign Out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-auto bg-[#F7FAFC] p-6 pb-20 relative">
+            
+            <!-- SCREEN 1: DASHBOARD -->
+            <div id="dashboard-page" class="page-section active max-w-7xl mx-auto space-y-6">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-primary-700 to-primary-900 rounded-xl p-8 text-white shadow-lg relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center">
+                        <div>
+                            <h1 class="text-3xl font-bold mb-2">Good Morning, Dr. Admin 👋</h1>
+                            <p class="text-primary-100 max-w-lg">You have 4 pending faculty approvals and 12 student requests to review today. Have a great day ahead!</p>
+                        </div>
+                        <div class="mt-6 md:mt-0 flex gap-3">
+                            <button class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium transition-colors backdrop-blur-sm border border-white/10">View Reports</button>
+                            <button class="px-4 py-2 bg-white text-primary-800 hover:bg-gray-50 rounded-lg font-medium transition-colors shadow-sm">Add Faculty</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Stat 1 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 mb-1">Total Departments</div>
+                                <div class="text-3xl font-bold text-gray-800">12</div>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-accent-100 flex items-center justify-center text-accent-600">
+                                <i data-lucide="building-2" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center font-medium"><i data-lucide="trending-up" class="w-4 h-4 mr-1"></i> 0%</span>
+                            <span class="text-gray-400 ml-2">vs last month</span>
+                        </div>
+                    </div>
+                    <!-- Stat 2 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 mb-1">Total Faculty</div>
+                                <div class="text-3xl font-bold text-gray-800">156</div>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center font-medium"><i data-lucide="trending-up" class="w-4 h-4 mr-1"></i> +4.2%</span>
+                            <span class="text-gray-400 ml-2">vs last month</span>
+                        </div>
+                    </div>
+                    <!-- Stat 3 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 mb-1">Total Courses</div>
+                                <div class="text-3xl font-bold text-gray-800">89</div>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
+                                <i data-lucide="book-open" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center font-medium"><i data-lucide="trending-up" class="w-4 h-4 mr-1"></i> +1.5%</span>
+                            <span class="text-gray-400 ml-2">vs last month</span>
+                        </div>
+                    </div>
+                    <!-- Stat 4 -->
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 mb-1">Total Students</div>
+                                <div class="text-3xl font-bold text-gray-800">2,847</div>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                                <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm">
+                            <span class="text-green-500 flex items-center font-medium"><i data-lucide="trending-up" class="w-4 h-4 mr-1"></i> +8.1%</span>
+                            <span class="text-gray-400 ml-2">vs last month</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Two Columns -->
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                    <!-- Recent Activity Table -->
+                    <div class="lg:col-span-3 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                            <h2 class="text-lg font-bold text-gray-800">Recent Activity</h2>
+                            <button class="text-primary-600 text-sm font-medium hover:text-primary-800">View All</button>
+                        </div>
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                                        <th class="p-4 font-semibold">Name</th>
+                                        <th class="p-4 font-semibold">Type</th>
+                                        <th class="p-4 font-semibold">Action</th>
+                                        <th class="p-4 font-semibold">Time</th>
+                                        <th class="p-4 font-semibold text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm divide-y divide-gray-100">
+                                    <tr class="hover:bg-primary-50 transition-colors group">
+                                        <td class="p-4 font-medium text-gray-800">Rahul Sharma</td>
+                                        <td class="p-4"><span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">Faculty</span></td>
+                                        <td class="p-4 text-gray-600">Profile Updated</td>
+                                        <td class="p-4 text-gray-500">10 mins ago</td>
+                                        <td class="p-4 text-center"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Success</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-primary-50 transition-colors group bg-gray-50/50">
+                                        <td class="p-4 font-medium text-gray-800">Priya Patel</td>
+                                        <td class="p-4"><span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">Student</span></td>
+                                        <td class="p-4 text-gray-600">New Enrollment</td>
+                                        <td class="p-4 text-gray-500">1 hour ago</td>
+                                        <td class="p-4 text-center"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Success</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-primary-50 transition-colors group">
+                                        <td class="p-4 font-medium text-gray-800">Computer Science</td>
+                                        <td class="p-4"><span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">Dept</span></td>
+                                        <td class="p-4 text-gray-600">Curriculum Update</td>
+                                        <td class="p-4 text-gray-500">2 hours ago</td>
+                                        <td class="p-4 text-center"><span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">Pending</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-primary-50 transition-colors group bg-gray-50/50">
+                                        <td class="p-4 font-medium text-gray-800">Amit Kumar</td>
+                                        <td class="p-4"><span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-medium">Student</span></td>
+                                        <td class="p-4 text-gray-600">Fee Payment</td>
+                                        <td class="p-4 text-gray-500">3 hours ago</td>
+                                        <td class="p-4 text-center"><span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Success</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-primary-50 transition-colors group">
+                                        <td class="p-4 font-medium text-gray-800">Dr. S. Verma</td>
+                                        <td class="p-4"><span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">Faculty</span></td>
+                                        <td class="p-4 text-gray-600">Leave Request</td>
+                                        <td class="p-4 text-gray-500">Yesterday</td>
+                                        <td class="p-4 text-center"><span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">Pending</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
+                        <div class="grid grid-cols-2 gap-4 flex-1 content-start">
+                            <button class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 rounded-lg transition-all text-gray-700 hover:text-primary-700 group">
+                                <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-2 group-hover:bg-primary-100 transition-colors">
+                                    <i data-lucide="building" class="w-5 h-5 text-gray-500 group-hover:text-primary-600"></i>
+                                </div>
+                                <span class="text-sm font-medium">Add Dept</span>
+                            </button>
+                            <button class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 rounded-lg transition-all text-gray-700 hover:text-primary-700 group">
+                                <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-2 group-hover:bg-primary-100 transition-colors">
+                                    <i data-lucide="user-plus" class="w-5 h-5 text-gray-500 group-hover:text-primary-600"></i>
+                                </div>
+                                <span class="text-sm font-medium">Add Faculty</span>
+                            </button>
+                            <button class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 rounded-lg transition-all text-gray-700 hover:text-primary-700 group">
+                                <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-2 group-hover:bg-primary-100 transition-colors">
+                                    <i data-lucide="book-plus" class="w-5 h-5 text-gray-500 group-hover:text-primary-600"></i>
+                                </div>
+                                <span class="text-sm font-medium">Add Course</span>
+                            </button>
+                            <button class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 rounded-lg transition-all text-gray-700 hover:text-primary-700 group">
+                                <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mb-2 group-hover:bg-primary-100 transition-colors">
+                                    <i data-lucide="graduation-cap" class="w-5 h-5 text-gray-500 group-hover:text-primary-600"></i>
+                                </div>
+                                <span class="text-sm font-medium">Add Student</span>
+                            </button>
+                            <button class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-primary-50 border border-gray-100 hover:border-primary-200 rounded-lg transition-all text-gray-700 hover:text-primary-700 group col-span-2">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mr-3 group-hover:bg-primary-100 transition-colors">
+                                        <i data-lucide="file-bar-chart" class="w-5 h-5 text-gray-500 group-hover:text-primary-600"></i>
+                                    </div>
+                                    <span class="text-sm font-medium">Generate Report</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Chart Area -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-6">Enrollment Trends (2024)</h2>
+                    <div class="h-64 flex items-end justify-between px-4 pb-4 border-b border-gray-200 space-x-2">
+                        <!-- Simple CSS Bar Chart -->
+                        <div class="w-full bg-primary-100 rounded-t hover:bg-primary-300 transition-colors relative group cursor-pointer" style="height: 30%">
+                            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">120</div>
+                            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">Jan</div>
+                        </div>
+                        <div class="w-full bg-primary-200 rounded-t hover:bg-primary-400 transition-colors relative group cursor-pointer" style="height: 45%">
+                            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">180</div>
+                            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">Feb</div>
+                        </div>
+                        <div class="w-full bg-primary-300 rounded-t hover:bg-primary-500 transition-colors relative group cursor-pointer" style="height: 60%">
+                            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">240</div>
+                            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">Mar</div>
+                        </div>
+                        <div class="w-full bg-primary-400 rounded-t hover:bg-primary-600 transition-colors relative group cursor-pointer" style="height: 80%">
+                            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">320</div>
+                            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">Apr</div>
+                        </div>
+                        <div class="w-full bg-primary-500 rounded-t hover:bg-primary-700 transition-colors relative group cursor-pointer" style="height: 65%">
+                            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">260</div>
+                            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">May</div>
+                        </div>
+                        <div class="w-full bg-primary-600 rounded-t hover:bg-primary-800 transition-colors relative group cursor-pointer" style="height: 90%">
+                            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">360</div>
+                            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">Jun</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAB -->
+                <button class="fixed bottom-8 right-8 w-14 h-14 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 group focus:outline-none z-10" onclick="alert('Open Global Add Menu')">
+                    <i data-lucide="plus" class="w-6 h-6"></i>
+                    <span class="absolute right-full mr-4 bg-gray-800 text-white text-xs font-medium py-1.5 px-3 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">Add New</span>
+                </button>
+            </div>
+
+            <!-- SCREEN 2: DEPARTMENTS -->
+            <div id="departments-page" class="page-section max-w-7xl mx-auto space-y-6">
+                <!-- Breadcrumbs & Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1 flex items-center">
+                            <span class="hover:text-primary-600 cursor-pointer nav-to-dashboard">Dashboard</span>
+                            <i data-lucide="chevron-right" class="w-3 h-3 mx-2"></i>
+                            <span class="text-gray-800 font-medium">Departments</span>
+                        </div>
+                        <div class="flex items-center">
+                            <h1 class="text-2xl font-bold text-gray-900">Departments</h1>
+                            <span class="ml-3 bg-gray-100 text-gray-600 text-xs font-bold px-2.5 py-1 rounded-full">12</span>
+                        </div>
+                    </div>
+                    <button class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center transition-colors shadow-sm" onclick="openModal('dept-modal')">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add Department
+                    </button>
+                </div>
+
+                <!-- Data Table Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <!-- Toolbar -->
+                    <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                        <div class="relative w-72">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" placeholder="Search departments..." class="w-full bg-white border border-gray-200 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors shadow-sm">
+                        </div>
+                        <button class="p-2 border border-gray-200 rounded-lg bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                            <i data-lucide="filter" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
+                                    <th class="p-4 font-semibold w-16">#</th>
+                                    <th class="p-4 font-semibold cursor-pointer hover:text-gray-700 select-none">Code <i data-lucide="arrow-up-down" class="w-3 h-3 inline-block ml-1"></i></th>
+                                    <th class="p-4 font-semibold cursor-pointer hover:text-gray-700 select-none">Department Name <i data-lucide="arrow-up-down" class="w-3 h-3 inline-block ml-1"></i></th>
+                                    <th class="p-4 font-semibold">HOD</th>
+                                    <th class="p-4 font-semibold text-right">Faculty</th>
+                                    <th class="p-4 font-semibold text-right">Students</th>
+                                    <th class="p-4 font-semibold">Status</th>
+                                    <th class="p-4 font-semibold text-center w-24">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm divide-y divide-gray-100">
+                                <!-- Row 1 -->
+                                <tr class="hover:bg-primary-50 transition-colors group">
+                                    <td class="p-4 text-gray-500">1</td>
+                                    <td class="p-4 font-medium text-gray-900">CS01</td>
+                                    <td class="p-4 font-semibold text-gray-800">Computer Science</td>
+                                    <td class="p-4 flex items-center">
+                                        <img src="https://ui-avatars.com/api/?name=Anita+Desai&background=E9D5FF&color=6B46C1" class="w-6 h-6 rounded-full mr-2">
+                                        Dr. Anita Desai
+                                    </td>
+                                    <td class="p-4 text-right font-medium">32</td>
+                                    <td class="p-4 text-right font-medium">850</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">Active</span></td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex justify-center space-x-2">
+                                            <button class="text-gray-400 hover:text-primary-600 transition-colors" title="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                            <button class="text-gray-400 hover:text-red-600 transition-colors" title="Delete" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Row 2 -->
+                                <tr class="hover:bg-primary-50 transition-colors group bg-gray-50/50">
+                                    <td class="p-4 text-gray-500">2</td>
+                                    <td class="p-4 font-medium text-gray-900">EC02</td>
+                                    <td class="p-4 font-semibold text-gray-800">Electronics</td>
+                                    <td class="p-4 flex items-center">
+                                        <img src="https://ui-avatars.com/api/?name=Rajeev+Singh&background=BEE3F8&color=2C5282" class="w-6 h-6 rounded-full mr-2">
+                                        Dr. Rajeev Singh
+                                    </td>
+                                    <td class="p-4 text-right font-medium">28</td>
+                                    <td class="p-4 text-right font-medium">620</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">Active</span></td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex justify-center space-x-2">
+                                            <button class="text-gray-400 hover:text-primary-600 transition-colors"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                            <button class="text-gray-400 hover:text-red-600 transition-colors" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Row 3 -->
+                                <tr class="hover:bg-primary-50 transition-colors group">
+                                    <td class="p-4 text-gray-500">3</td>
+                                    <td class="p-4 font-medium text-gray-900">ME03</td>
+                                    <td class="p-4 font-semibold text-gray-800">Mechanical</td>
+                                    <td class="p-4 flex items-center">
+                                        <img src="https://ui-avatars.com/api/?name=Vikram+Rao&background=FED7D7&color=C53030" class="w-6 h-6 rounded-full mr-2">
+                                        Dr. Vikram Rao
+                                    </td>
+                                    <td class="p-4 text-right font-medium">24</td>
+                                    <td class="p-4 text-right font-medium">540</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">Active</span></td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex justify-center space-x-2">
+                                            <button class="text-gray-400 hover:text-primary-600 transition-colors"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                            <button class="text-gray-400 hover:text-red-600 transition-colors" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Row 4 -->
+                                <tr class="hover:bg-primary-50 transition-colors group bg-gray-50/50">
+                                    <td class="p-4 text-gray-500">4</td>
+                                    <td class="p-4 font-medium text-gray-900">CE04</td>
+                                    <td class="p-4 font-semibold text-gray-800">Civil</td>
+                                    <td class="p-4 flex items-center">
+                                        <img src="https://ui-avatars.com/api/?name=Meera+Nair&background=C6F6D5&color=276749" class="w-6 h-6 rounded-full mr-2">
+                                        Dr. Meera Nair
+                                    </td>
+                                    <td class="p-4 text-right font-medium">18</td>
+                                    <td class="p-4 text-right font-medium">410</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium border border-gray-200">Inactive</span></td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex justify-center space-x-2">
+                                            <button class="text-gray-400 hover:text-primary-600 transition-colors"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                            <button class="text-gray-400 hover:text-red-600 transition-colors" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Rows 5-8 omitted for brevity, adding similar structure -->
+                                <tr class="hover:bg-primary-50 transition-colors group">
+                                    <td class="p-4 text-gray-500">5</td>
+                                    <td class="p-4 font-medium text-gray-900">EE05</td>
+                                    <td class="p-4 font-semibold text-gray-800">Electrical</td>
+                                    <td class="p-4 flex items-center">
+                                        <img src="https://ui-avatars.com/api/?name=Suresh+Iyer&background=FEEBC8&color=C05621" class="w-6 h-6 rounded-full mr-2">
+                                        Dr. Suresh Iyer
+                                    </td>
+                                    <td class="p-4 text-right font-medium">22</td>
+                                    <td class="p-4 text-right font-medium">480</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">Active</span></td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex justify-center space-x-2">
+                                            <button class="text-gray-400 hover:text-primary-600 transition-colors"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                            <button class="text-gray-400 hover:text-red-600 transition-colors" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-primary-50 transition-colors group bg-gray-50/50">
+                                    <td class="p-4 text-gray-500">6</td>
+                                    <td class="p-4 font-medium text-gray-900">IT06</td>
+                                    <td class="p-4 font-semibold text-gray-800">Information Tech</td>
+                                    <td class="p-4 flex items-center">
+                                        <img src="https://ui-avatars.com/api/?name=Neha+Gupta&background=E9D5FF&color=6B46C1" class="w-6 h-6 rounded-full mr-2">
+                                        Dr. Neha Gupta
+                                    </td>
+                                    <td class="p-4 text-right font-medium">30</td>
+                                    <td class="p-4 text-right font-medium">790</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">Active</span></td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex justify-center space-x-2">
+                                            <button class="text-gray-400 hover:text-primary-600 transition-colors"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                            <button class="text-gray-400 hover:text-red-600 transition-colors" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-primary-50 transition-colors group">
+                                    <td class="p-4 text-gray-500">7</td>
+                                    <td class="p-4 font-medium text-gray-900">MA07</td>
+                                    <td class="p-4 font-semibold text-gray-800">Mathematics</td>
+                                    <td class="p-4 flex items-center">
+                                        <img src="https://ui-avatars.com/api/?name=Anil+Jain&background=BEE3F8&color=2C5282" class="w-6 h-6 rounded-full mr-2">
+                                        Dr. Anil Jain
+                                    </td>
+                                    <td class="p-4 text-right font-medium">15</td>
+                                    <td class="p-4 text-right font-medium">0</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">Active</span></td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex justify-center space-x-2">
+                                            <button class="text-gray-400 hover:text-primary-600 transition-colors"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                            <button class="text-gray-400 hover:text-red-600 transition-colors" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-primary-50 transition-colors group bg-gray-50/50">
+                                    <td class="p-4 text-gray-500">8</td>
+                                    <td class="p-4 font-medium text-gray-900">PH08</td>
+                                    <td class="p-4 font-semibold text-gray-800">Physics</td>
+                                    <td class="p-4 flex items-center">
+                                        <img src="https://ui-avatars.com/api/?name=Priya+Sen&background=FED7D7&color=C53030" class="w-6 h-6 rounded-full mr-2">
+                                        Dr. Priya Sen
+                                    </td>
+                                    <td class="p-4 text-right font-medium">12</td>
+                                    <td class="p-4 text-right font-medium">0</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">Active</span></td>
+                                    <td class="p-4 text-center">
+                                        <div class="flex justify-center space-x-2">
+                                            <button class="text-gray-400 hover:text-primary-600 transition-colors"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                                            <button class="text-gray-400 hover:text-red-600 transition-colors" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="p-4 border-t border-gray-100 flex items-center justify-between text-sm">
+                        <div class="text-gray-500">Showing 1 to 8 of 12 entries</div>
+                        <div class="flex gap-1">
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-500 hover:bg-gray-50 disabled:opacity-50" disabled>Prev</button>
+                            <button class="px-3 py-1 bg-primary-600 text-white rounded font-medium">1</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-700 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-700 hover:bg-gray-50">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN 3: FACULTY LIST -->
+            <div id="faculty-page" class="page-section max-w-7xl mx-auto space-y-6">
+                 <!-- Breadcrumbs & Header -->
+                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1 flex items-center">
+                            <span class="hover:text-primary-600 cursor-pointer nav-to-dashboard">Dashboard</span>
+                            <i data-lucide="chevron-right" class="w-3 h-3 mx-2"></i>
+                            <span class="text-gray-800 font-medium">Faculty Members</span>
+                        </div>
+                        <div class="flex items-center">
+                            <h1 class="text-2xl font-bold text-gray-900">Faculty Members</h1>
+                            <span class="ml-3 bg-gray-100 text-gray-600 text-xs font-bold px-2.5 py-1 rounded-full">156</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium text-sm flex items-center transition-colors shadow-sm">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Export CSV
+                        </button>
+                        <button class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center transition-colors shadow-sm" onclick="showToast('Add Faculty Form Opened', 'success')">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add Faculty
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-center justify-between">
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <select class="border border-gray-200 text-sm rounded-lg py-2 px-3 focus:outline-none focus:border-primary-500 bg-white">
+                            <option>All Departments</option>
+                            <option>Computer Science</option>
+                            <option>Electronics</option>
+                            <option>Mechanical</option>
+                        </select>
+                        <select class="border border-gray-200 text-sm rounded-lg py-2 px-3 focus:outline-none focus:border-primary-500 bg-white">
+                            <option>All Status</option>
+                            <option>Active</option>
+                            <option>On Leave</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+                    <div class="relative w-full md:w-64">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" placeholder="Search faculty..." class="w-full bg-white border border-gray-200 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary-500">
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
+                                    <th class="p-4 font-semibold w-12">#</th>
+                                    <th class="p-4 font-semibold">Name</th>
+                                    <th class="p-4 font-semibold">Emp ID</th>
+                                    <th class="p-4 font-semibold">Department</th>
+                                    <th class="p-4 font-semibold">Phone</th>
+                                    <th class="p-4 font-semibold text-center">Exp (Yrs)</th>
+                                    <th class="p-4 font-semibold">Status</th>
+                                    <th class="p-4 font-semibold text-center w-24">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm divide-y divide-gray-100">
+                                <!-- Example Row -->
+                                <tr class="hover:bg-primary-50 transition-colors">
+                                    <td class="p-4 text-gray-500">1</td>
+                                    <td class="p-4">
+                                        <div class="flex items-center">
+                                            <img src="https://ui-avatars.com/api/?name=Arun+Kumar&background=E9D5FF&color=6B46C1" class="w-8 h-8 rounded-full mr-3">
+                                            <div>
+                                                <div class="font-semibold text-gray-800">Dr. Arun Kumar</div>
+                                                <div class="text-xs text-gray-500">arun.k@eduzy.ac.in</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-gray-600 font-medium">EMP1042</td>
+                                    <td class="p-4"><span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium border border-blue-100">Computer Science</span></td>
+                                    <td class="p-4 text-gray-600">+91 9876543210</td>
+                                    <td class="p-4 text-center font-medium">8</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">Active</span></td>
+                                    <td class="p-4 text-center">
+                                        <button class="text-gray-400 hover:text-primary-600 mr-2"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                                        <button class="text-gray-400 hover:text-red-600" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-primary-50 transition-colors bg-gray-50/50">
+                                    <td class="p-4 text-gray-500">2</td>
+                                    <td class="p-4">
+                                        <div class="flex items-center">
+                                            <img src="https://ui-avatars.com/api/?name=Sneha+Reddy&background=BEE3F8&color=2C5282" class="w-8 h-8 rounded-full mr-3">
+                                            <div>
+                                                <div class="font-semibold text-gray-800">Sneha Reddy</div>
+                                                <div class="text-xs text-gray-500">sneha.r@eduzy.ac.in</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-gray-600 font-medium">EMP1055</td>
+                                    <td class="p-4"><span class="px-2 py-1 bg-purple-50 text-purple-700 rounded text-xs font-medium border border-purple-100">Electronics</span></td>
+                                    <td class="p-4 text-gray-600">+91 9988776655</td>
+                                    <td class="p-4 text-center font-medium">4</td>
+                                    <td class="p-4"><span class="px-2.5 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium border border-yellow-200">On Leave</span></td>
+                                    <td class="p-4 text-center">
+                                        <button class="text-gray-400 hover:text-primary-600 mr-2"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                                        <button class="text-gray-400 hover:text-red-600" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Generating a few more rows for realism -->
+                                <script>
+                                    const facultyData = [
+                                        {id: 3, name: 'Dr. Ramesh Yadav', email: 'ramesh.y@eduzy.ac.in', emp: 'EMP1062', dept: 'Mechanical', deptClass: 'bg-red-50 text-red-700 border-red-100', phone: '+91 8877665544', exp: 12, status: 'Active', statusClass: 'bg-green-100 text-green-700 border-green-200'},
+                                        {id: 4, name: 'Kavita Sharma', email: 'kavita.s@eduzy.ac.in', emp: 'EMP1088', dept: 'Civil', deptClass: 'bg-orange-50 text-orange-700 border-orange-100', phone: '+91 7766554433', exp: 3, status: 'Active', statusClass: 'bg-green-100 text-green-700 border-green-200'},
+                                        {id: 5, name: 'Dr. Sanjay Patel', email: 'sanjay.p@eduzy.ac.in', emp: 'EMP1021', dept: 'Information Tech', deptClass: 'bg-teal-50 text-teal-700 border-teal-100', phone: '+91 6655443322', exp: 15, status: 'Inactive', statusClass: 'bg-gray-100 text-gray-700 border-gray-200'},
+                                        {id: 6, name: 'Pooja Singh', email: 'pooja.s@eduzy.ac.in', emp: 'EMP1104', dept: 'Computer Science', deptClass: 'bg-blue-50 text-blue-700 border-blue-100', phone: '+91 5544332211', exp: 2, status: 'Active', statusClass: 'bg-green-100 text-green-700 border-green-200'},
+                                        {id: 7, name: 'Dr. Rakesh Tiwari', email: 'rakesh.t@eduzy.ac.in', emp: 'EMP1015', dept: 'Electrical', deptClass: 'bg-yellow-50 text-yellow-700 border-yellow-100', phone: '+91 4433221100', exp: 20, status: 'Active', statusClass: 'bg-green-100 text-green-700 border-green-200'},
+                                        {id: 8, name: 'Neha Chawla', email: 'neha.c@eduzy.ac.in', emp: 'EMP1120', dept: 'Mathematics', deptClass: 'bg-indigo-50 text-indigo-700 border-indigo-100', phone: '+91 3322110099', exp: 5, status: 'Active', statusClass: 'bg-green-100 text-green-700 border-green-200'},
+                                    ];
+                                    facultyData.forEach((f, index) => {
+                                        document.write(`
+                                        <tr class="hover:bg-primary-50 transition-colors ${index%2===0 ? 'bg-gray-50/50' : ''}">
+                                            <td class="p-4 text-gray-500">${f.id}</td>
+                                            <td class="p-4">
+                                                <div class="flex items-center">
+                                                    <img src="https://ui-avatars.com/api/?name=${f.name.replace(/ /g, '+')}&background=random" class="w-8 h-8 rounded-full mr-3">
+                                                    <div>
+                                                        <div class="font-semibold text-gray-800">${f.name}</div>
+                                                        <div class="text-xs text-gray-500">${f.email}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="p-4 text-gray-600 font-medium">${f.emp}</td>
+                                            <td class="p-4"><span class="px-2 py-1 ${f.deptClass} rounded text-xs font-medium border">${f.dept}</span></td>
+                                            <td class="p-4 text-gray-600">${f.phone}</td>
+                                            <td class="p-4 text-center font-medium">${f.exp}</td>
+                                            <td class="p-4"><span class="px-2.5 py-1 ${f.statusClass} rounded-full text-xs font-medium border">${f.status}</span></td>
+                                            <td class="p-4 text-center">
+                                                <button class="text-gray-400 hover:text-primary-600 mr-2"><i data-lucide="edit" class="w-4 h-4"></i></button>
+                                                <button class="text-gray-400 hover:text-red-600" onclick="confirmDelete()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                            </td>
+                                        </tr>`);
+                                    });
+                                </script>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 border-t border-gray-100 flex items-center justify-between text-sm">
+                        <div class="text-gray-500">Showing 1 to 8 of 156 entries</div>
+                        <div class="flex gap-1">
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-500 hover:bg-gray-50 disabled:opacity-50" disabled>Prev</button>
+                            <button class="px-3 py-1 bg-primary-600 text-white rounded font-medium">1</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-700 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-700 hover:bg-gray-50">3</button>
+                            <span class="px-2 py-1 text-gray-500">...</span>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-700 hover:bg-gray-50">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN 4: STUDENTS LIST -->
+            <div id="students-page" class="page-section max-w-7xl mx-auto space-y-6">
+                 <!-- Breadcrumbs & Header -->
+                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="text-sm text-gray-500 mb-1 flex items-center">
+                            <span class="hover:text-primary-600 cursor-pointer nav-to-dashboard">Dashboard</span>
+                            <i data-lucide="chevron-right" class="w-3 h-3 mx-2"></i>
+                            <span class="text-gray-800 font-medium">Students</span>
+                        </div>
+                        <div class="flex items-center">
+                            <h1 class="text-2xl font-bold text-gray-900">Students</h1>
+                            <span class="ml-3 bg-gray-100 text-gray-600 text-xs font-bold px-2.5 py-1 rounded-full">2,847</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="relative group">
+                            <button class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium text-sm flex items-center transition-colors shadow-sm">
+                                Bulk Actions <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
+                            </button>
+                            <div class="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 hidden group-hover:block z-50">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onclick="showToast('Promotion initiated', 'success')">Promote Semester</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Send Notice</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Delete Selected</a>
+                            </div>
+                        </div>
+                        <button class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium text-sm flex items-center transition-colors shadow-sm hidden md:flex">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Export CSV
+                        </button>
+                        <button class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center transition-colors shadow-sm">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add Student
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <select class="border border-gray-200 text-sm rounded-lg py-2 px-3 focus:outline-none focus:border-primary-500 bg-white">
+                        <option>All Departments</option>
+                        <option>Computer Science</option>
+                    </select>
+                    <select class="border border-gray-200 text-sm rounded-lg py-2 px-3 focus:outline-none focus:border-primary-500 bg-white">
+                        <option>All Semesters</option>
+                        <option>Semester 1</option>
+                        <option>Semester 5</option>
+                    </select>
+                    <select class="border border-gray-200 text-sm rounded-lg py-2 px-3 focus:outline-none focus:border-primary-500 bg-white">
+                        <option>Attendance Filter</option>
+                        <option>> 75%</option>
+                        <option>< 75%</option>
+                    </select>
+                    <select class="border border-gray-200 text-sm rounded-lg py-2 px-3 focus:outline-none focus:border-primary-500 bg-white">
+                        <option>Fee Status</option>
+                        <option>Paid</option>
+                        <option>Partial</option>
+                        <option>Due</option>
+                    </select>
+                    <div class="relative col-span-2 md:col-span-1">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" placeholder="Search by ID, Name..." class="w-full bg-white border border-gray-200 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary-500">
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
+                                    <th class="p-4 w-10 text-center"><input type="checkbox" id="selectAll" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"></th>
+                                    <th class="p-4 font-semibold">Enrollment No</th>
+                                    <th class="p-4 font-semibold">Student Name</th>
+                                    <th class="p-4 font-semibold">Dept & Sem</th>
+                                    <th class="p-4 font-semibold text-center">CGPA</th>
+                                    <th class="p-4 font-semibold">Attendance</th>
+                                    <th class="p-4 font-semibold">Fee Status</th>
+                                    <th class="p-4 font-semibold text-center w-24">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm divide-y divide-gray-100" id="students-tbody">
+                                <!-- Dynamic rows generated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 border-t border-gray-100 flex items-center justify-between text-sm">
+                        <div class="text-gray-500">Showing 1 to 8 of 2847 entries</div>
+                        <div class="flex gap-1">
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-500 hover:bg-gray-50 disabled:opacity-50" disabled>Prev</button>
+                            <button class="px-3 py-1 bg-primary-600 text-white rounded font-medium">1</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-700 hover:bg-gray-50">2</button>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-700 hover:bg-gray-50">3</button>
+                            <span class="px-2 py-1 text-gray-500">...</span>
+                            <button class="px-3 py-1 border border-gray-200 rounded text-gray-700 hover:bg-gray-50">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 items-center justify-center p-4">
+        <!-- Add Department Modal -->
+        <div id="dept-modal" class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all hidden flex-col max-h-full">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900">Add New Department</h3>
+                <button class="text-gray-400 hover:text-gray-700 transition-colors close-modal">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto">
+                <form class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Department Code</label>
+                        <input type="text" placeholder="e.g. CS01" class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Department Name</label>
+                        <input type="text" placeholder="e.g. Computer Science" class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Head of Department</label>
+                        <select class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white">
+                            <option>Select HOD</option>
+                            <option>Dr. Anita Desai</option>
+                            <option>Dr. Rajeev Singh</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea rows="3" class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"></textarea>
+                    </div>
+                    <div class="flex items-center">
+                        <label class="text-sm font-medium text-gray-700 mr-3">Status</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" checked>
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-600"></div>
+                            <span class="ml-3 text-sm font-medium text-gray-600">Active</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+                <button class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 close-modal">Cancel</button>
+                <button class="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-lg hover:bg-primary-700 shadow-sm" onclick="saveDept()">Save Department</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // --- Navigation Logic ---
+        const navItems = document.querySelectorAll('.nav-item');
+        const pageSections = document.querySelectorAll('.page-section');
+        const dashboardLinks = document.querySelectorAll('.nav-to-dashboard');
+
+        function switchPage(targetId) {
+            // Hide all pages
+            pageSections.forEach(page => page.classList.remove('active'));
+            // Show target page
+            document.getElementById(targetId).classList.add('active');
+
+            // Update sidebar UI
+            navItems.forEach(item => {
+                if (item.dataset.target === targetId) {
+                    item.classList.add('border-primary-600', 'bg-primary-50', 'text-primary-700');
+                    item.classList.remove('border-transparent', 'text-gray-600', 'hover:bg-gray-100', 'hover:text-gray-900');
+                } else if(item.dataset.target) {
+                    item.classList.remove('border-primary-600', 'bg-primary-50', 'text-primary-700');
+                    item.classList.add('border-transparent', 'text-gray-600', 'hover:bg-gray-100', 'hover:text-gray-900');
+                }
+            });
+            
+            // On mobile, close sidebar after nav
+            if(window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('hidden');
+            }
+            
+            // Scroll to top
+            document.querySelector('.overflow-auto').scrollTop = 0;
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                if(item.dataset.target) switchPage(item.dataset.target);
+            });
+        });
+
+        dashboardLinks.forEach(link => {
+            link.addEventListener('click', () => switchPage('dashboard-page'));
+        });
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('absolute');
+            sidebar.classList.toggle('z-30');
+            sidebar.classList.toggle('shadow-2xl');
+        });
+
+        // --- Toast Notification ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast show';
+            
+            let icon = '';
+            if (type === 'success') {
+                icon = `<div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0"><i data-lucide="check-circle" class="w-5 h-5"></i></div>`;
+            } else if (type === 'error') {
+                icon = `<div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 flex-shrink-0"><i data-lucide="x-circle" class="w-5 h-5"></i></div>`;
+            } else if (type === 'warning') {
+                icon = `<div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 flex-shrink-0"><i data-lucide="alert-triangle" class="w-5 h-5"></i></div>`;
+            }
+
+            toast.innerHTML = `
+                ${icon}
+                <div class="flex-1 text-sm font-medium text-gray-800">${message}</div>
+                <button class="text-gray-400 hover:text-gray-600" onclick="this.parentElement.remove()"><i data-lucide="x" class="w-4 h-4"></i></button>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons({ root: toast });
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Confirm Dialog ---
+        function confirmDelete() {
+            if(confirm("Are you sure you want to delete this record? This action cannot be undone.")) {
+                showToast("Record deleted successfully.", "success");
+            }
+        }
+
+        // --- Modal Logic ---
+        const modalOverlay = document.getElementById('modal-overlay');
+        const closeBtns = document.querySelectorAll('.close-modal');
+
+        function openModal(modalId) {
+            modalOverlay.classList.add('active');
+            // Hide all modals inside overlay
+            Array.from(modalOverlay.children).forEach(child => child.classList.add('hidden'));
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById(modalId).classList.add('flex');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        closeBtns.forEach(btn => btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModal();
+        }));
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+        
+        function saveDept() {
+            closeModal();
+            showToast('Department added successfully!', 'success');
+        }
+
+        // --- Students Data Generation ---
+        const studentsData = [
+            { id: 'ENR24001', name: 'Aarav Patel', email: 'aarav.p@student.eduzy.ac.in', dept: 'CS', sem: 5, cgpa: 8.9, att: 82, fee: 'Paid' },
+            { id: 'ENR24002', name: 'Diya Sharma', email: 'diya.s@student.eduzy.ac.in', dept: 'CS', sem: 5, cgpa: 9.2, att: 95, fee: 'Paid' },
+            { id: 'ENR24056', name: 'Kabir Singh', email: 'kabir.s@student.eduzy.ac.in', dept: 'ME', sem: 3, cgpa: 6.8, att: 65, fee: 'Due' },
+            { id: 'ENR24102', name: 'Ananya Gupta', email: 'ananya.g@student.eduzy.ac.in', dept: 'EC', sem: 7, cgpa: 8.5, att: 78, fee: 'Partial' },
+            { id: 'ENR24115', name: 'Vihaan Kumar', email: 'vihaan.k@student.eduzy.ac.in', dept: 'IT', sem: 1, cgpa: 7.4, att: 88, fee: 'Paid' },
+            { id: 'ENR24188', name: 'Zara Khan', email: 'zara.k@student.eduzy.ac.in', dept: 'CE', sem: 5, cgpa: 9.5, att: 92, fee: 'Paid' },
+            { id: 'ENR24205', name: 'Reyansh Reddy', email: 'reyansh.r@student.eduzy.ac.in', dept: 'CS', sem: 3, cgpa: 5.9, att: 55, fee: 'Due' },
+            { id: 'ENR24233', name: 'Ishita Verma', email: 'ishita.v@student.eduzy.ac.in', dept: 'EE', sem: 7, cgpa: 8.1, att: 76, fee: 'Partial' },
+        ];
+
+        const tbody = document.getElementById('students-tbody');
+        let html = '';
+        studentsData.forEach((s, i) => {
+            const attColor = s.att >= 75 ? 'bg-green-500' : 'bg-red-500';
+            const attText = s.att >= 75 ? 'text-green-600' : 'text-red-600';
+            
+            let feeBadge = '';
+            if(s.fee === 'Paid') feeBadge = '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">Paid</span>';
+            else if (s.fee === 'Partial') feeBadge = '<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium border border-yellow-200">Partial</span>';
+            else feeBadge = '<span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium border border-red-200">Due</span>';
+
+            html += `
+            <tr class="hover:bg-primary-50 transition-colors ${i%2!==0 ? 'bg-gray-50/50' : ''}">
+                <td class="p-4 text-center"><input type="checkbox" class="student-cb rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"></td>
+                <td class="p-4 font-medium text-gray-900">${s.id}</td>
+                <td class="p-4">
+                    <div class="flex items-center">
+                        <img src="https://ui-avatars.com/api/?name=${s.name.replace(/ /g, '+')}&background=random" class="w-8 h-8 rounded-full mr-3 shadow-sm">
+                        <div>
+                            <div class="font-semibold text-gray-800">${s.name}</div>
+                            <div class="text-xs text-gray-500">${s.email}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="p-4">
+                    <div class="text-sm font-medium text-gray-800">${s.dept}</div>
+                    <div class="text-xs text-gray-500">Sem ${s.sem}</div>
+                </td>
+                <td class="p-4 text-center font-bold text-gray-700">${s.cgpa}</td>
+                <td class="p-4">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-semibold ${attText}">${s.att}%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar ${attColor}" style="width: ${s.att}%"></div>
+                    </div>
+                </td>
+                <td class="p-4">${feeBadge}</td>
+                <td class="p-4 text-center">
+                    <button class="text-gray-400 hover:text-primary-600 mr-2" title="View Profile"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                    <button class="text-gray-400 hover:text-red-600" onclick="confirmDelete()" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </td>
+            </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+
+        // Select All Logic
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.student-cb');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+
+    </script>
+</body>
+</html>

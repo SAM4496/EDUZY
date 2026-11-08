@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eduzy - Faculty Portal</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#FAF5FF', 100: '#F3E8FF', 200: '#E9D5FF', 300: '#D8B4FE', 400: '#C084FC', 500: '#A855F7', 600: '#9333EA', 700: '#7C3AED', 800: '#6B46C1', 900: '#581C87' },
+                        accent: { 50: '#EBF8FF', 100: '#BEE3F8', 200: '#90CDF4', 300: '#63B3ED', 400: '#4299E1', 500: '#3182CE', 600: '#2B6CB0', 700: '#2C5282' },
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        .screen-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .screen-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #48BB78;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #48BB78;
+        }
+        .toggle-checkbox:not(:checked) {
+            border-color: #F56565;
+        }
+        .toggle-checkbox:not(:checked) + .toggle-label {
+            background-color: #F56565;
+        }
+    </style>
+</head>
+<body class="font-inter bg-slate-50 text-slate-800 h-screen flex overflow-hidden">
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-white w-64 border-r border-slate-200 flex flex-col fixed md:relative z-50 h-full transition-transform duration-300 transform -translate-x-full md:translate-x-0">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-200">
+            <div class="flex items-center gap-2 text-primary-800">
+                <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+                <span class="text-xl font-bold tracking-tight">Eduzy</span>
+            </div>
+            <button id="close-sidebar" class="ml-auto md:hidden text-slate-500 hover:text-slate-800">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="px-6 py-4">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Faculty Portal</span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+            <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-primary-800 bg-primary-50 border-l-4 border-primary-600" data-target="faculty-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                Dashboard
+            </button>
+            <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent" data-target="faculty-courses">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+                My Courses
+            </button>
+            <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent" data-target="faculty-attendance">
+                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                Mark Attendance
+            </button>
+            <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent" data-target="faculty-assignments">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+                Assignments
+            </button>
+            <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent" data-target="faculty-students">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                Students
+            </button>
+            <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+                Timetable
+            </button>
+            <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent">
+                <i data-lucide="award" class="w-5 h-5"></i>
+                Results
+            </button>
+            <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent">
+                <i data-lucide="megaphone" class="w-5 h-5"></i>
+                Notices
+            </button>
+            <button class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent" data-target="faculty-profile">
+                <i data-lucide="user-cog" class="w-5 h-5"></i>
+                Profile & Settings
+            </button>
+        </nav>
+
+        <!-- Bottom -->
+        <div class="p-4 border-t border-slate-200 space-y-2">
+            <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                <i data-lucide="life-buoy" class="w-5 h-5"></i>
+                Academic Support
+            </button>
+            <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                Sign Out
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shrink-0">
+            <div class="flex items-center gap-4">
+                <button id="open-sidebar" class="md:hidden text-slate-500 hover:text-slate-800">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                
+                <!-- Search -->
+                <div class="hidden sm:flex items-center bg-slate-100 rounded-lg px-3 py-2 w-64 lg:w-80">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+                    <input type="text" placeholder="Search students, courses..." class="bg-transparent border-none outline-none text-sm ml-2 w-full text-slate-700 placeholder-slate-400">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 sm:gap-6">
+                <!-- Session Badge -->
+                <div class="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-full text-xs font-medium text-slate-600">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                    Fall 2024 • Sem 5
+                </div>
+
+                <!-- Notifications -->
+                <button class="relative text-slate-500 hover:text-slate-800 transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">5</span>
+                </button>
+
+                <!-- Profile Dropdown (visual) -->
+                <div class="flex items-center gap-3 pl-4 sm:border-l border-slate-200 cursor-pointer group">
+                    <div class="hidden sm:block text-right">
+                        <div class="text-sm font-semibold text-slate-800 group-hover:text-primary-700 transition-colors">Prof. Sarah Jenkins</div>
+                        <div class="text-xs text-slate-500">Computer Science</div>
+                    </div>
+                    <img src="https://i.pravatar.cc/150?img=47" alt="Profile" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm group-hover:border-primary-200 transition-colors">
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Main Area -->
+        <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8 relative">
+            
+            <!-- ========================================== -->
+            <!-- SCREEN 1: FACULTY DASHBOARD                -->
+            <!-- ========================================== -->
+            <div id="faculty-dashboard" class="screen-content active max-w-7xl mx-auto space-y-6">
+                
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-primary-800 to-primary-600 rounded-xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold mb-2">Good Morning, Prof. Jenkins 👋</h1>
+                        <p class="text-primary-100">You have 3 classes today and 12 assignments to review.</p>
+                    </div>
+                    <div class="flex gap-3 shrink-0">
+                        <button class="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg text-sm font-medium transition-colors backdrop-blur-sm">
+                            View Timetable
+                        </button>
+                        <button class="nav-redirect px-4 py-2 bg-white text-primary-800 hover:bg-slate-50 rounded-lg text-sm font-medium transition-colors shadow-sm" data-target="faculty-attendance">
+                            Mark Attendance
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                            <i data-lucide="book" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Courses Teaching</p>
+                            <p class="text-2xl font-bold text-slate-800">4</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center shrink-0">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Total Students</p>
+                            <p class="text-2xl font-bold text-slate-800">180</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
+                            <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Pending Reviews</p>
+                            <p class="text-2xl font-bold text-slate-800">12</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center shrink-0 relative">
+                            <!-- Fake circular progress -->
+                            <svg class="w-12 h-12 absolute -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-green-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="text-green-500" stroke-width="3" stroke-dasharray="82.5, 100" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <i data-lucide="pie-chart" class="w-5 h-5 relative z-10 text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500 font-medium">Avg Attendance</p>
+                            <p class="text-2xl font-bold text-slate-800">82.5%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Main Col -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Quick Actions -->
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                            <h2 class="text-lg font-bold text-slate-800 mb-4">Quick Actions</h2>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                <button class="nav-redirect flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-slate-100 bg-slate-50 hover:bg-primary-50 hover:border-primary-200 transition-colors group" data-target="faculty-attendance">
+                                    <div class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                                        <i data-lucide="check-square" class="w-5 h-5"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Mark Attendance</span>
+                                </button>
+                                <button class="nav-redirect flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-slate-100 bg-slate-50 hover:bg-primary-50 hover:border-primary-200 transition-colors group" data-target="faculty-assignments">
+                                    <div class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Create Assignment</span>
+                                </button>
+                                <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-slate-100 bg-slate-50 hover:bg-primary-50 hover:border-primary-200 transition-colors group">
+                                    <div class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                                        <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">View Reports</span>
+                                </button>
+                                <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-lg border border-slate-100 bg-slate-50 hover:bg-primary-50 hover:border-primary-200 transition-colors group">
+                                    <div class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                                        <i data-lucide="send" class="w-5 h-5"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-slate-700">Post Notice</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Recent Submissions -->
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-bold text-slate-800">Recent Submissions</h2>
+                                <button class="text-sm font-medium text-primary-600 hover:text-primary-800">View All</button>
+                            </div>
+                            <div class="space-y-4">
+                                <!-- item -->
+                                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://i.pravatar.cc/150?img=11" alt="Student" class="w-10 h-10 rounded-full">
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-800">Alex Johnson</p>
+                                            <p class="text-xs text-slate-500">CS501 - ER Diagram Assignment</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-slate-500 mb-1">10 mins ago</p>
+                                        <span class="inline-flex px-2 py-1 bg-yellow-50 text-yellow-700 rounded-md text-[10px] font-bold tracking-wide uppercase">Needs Review</span>
+                                    </div>
+                                </div>
+                                <!-- item -->
+                                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://i.pravatar.cc/150?img=12" alt="Student" class="w-10 h-10 rounded-full">
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-800">Maria Garcia</p>
+                                            <p class="text-xs text-slate-500">CS502 - Graph Search Lab</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-slate-500 mb-1">1 hour ago</p>
+                                        <span class="inline-flex px-2 py-1 bg-green-50 text-green-700 rounded-md text-[10px] font-bold tracking-wide uppercase">Graded (18/20)</span>
+                                    </div>
+                                </div>
+                                <!-- item -->
+                                <div class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-sm">
+                                            JS
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-800">James Smith</p>
+                                            <p class="text-xs text-slate-500">CS501 - SQL Queries</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-slate-500 mb-1">2 hours ago</p>
+                                        <span class="inline-flex px-2 py-1 bg-yellow-50 text-yellow-700 rounded-md text-[10px] font-bold tracking-wide uppercase">Needs Review</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Col -->
+                    <div class="space-y-6">
+                        <!-- Today's Schedule -->
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                            <h2 class="text-lg font-bold text-slate-800 mb-4">Today's Schedule</h2>
+                            
+                            <div class="relative border-l-2 border-slate-200 ml-3 space-y-6 pb-2">
+                                <!-- Past Class -->
+                                <div class="relative pl-6 opacity-60">
+                                    <div class="absolute w-3 h-3 bg-slate-300 rounded-full -left-[7px] top-1.5 border-2 border-white"></div>
+                                    <p class="text-xs font-bold text-slate-500 mb-0.5">09:00 AM - 10:30 AM</p>
+                                    <p class="text-sm font-semibold text-slate-800">CS501 Database Systems</p>
+                                    <p class="text-xs text-slate-500 flex items-center gap-1 mt-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Hall 302</p>
+                                </div>
+                                
+                                <!-- Current Class -->
+                                <div class="relative pl-6">
+                                    <div class="absolute w-3 h-3 bg-blue-500 rounded-full -left-[7px] top-1.5 border-2 border-white shadow-[0_0_0_2px_rgba(59,130,246,0.3)]"></div>
+                                    <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 -mt-2">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <p class="text-xs font-bold text-blue-600 mb-0.5 flex items-center gap-2">
+                                                    11:15 AM - 12:45 PM
+                                                    <span class="relative flex h-2 w-2">
+                                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                                      <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                                    </span>
+                                                </p>
+                                                <p class="text-sm font-bold text-slate-800">CS502 Algorithms</p>
+                                                <p class="text-xs text-slate-600 flex items-center gap-1 mt-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Seminar Room A</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Upcoming Class -->
+                                <div class="relative pl-6">
+                                    <div class="absolute w-3 h-3 bg-slate-300 rounded-full -left-[7px] top-1.5 border-2 border-white"></div>
+                                    <p class="text-xs font-bold text-slate-500 mb-0.5">02:00 PM - 04:00 PM</p>
+                                    <p class="text-sm font-semibold text-slate-800">CS505 Web Tech Lab</p>
+                                    <p class="text-xs text-slate-500 flex items-center gap-1 mt-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Lab 4</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming Deadlines -->
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+                            <h2 class="text-lg font-bold text-slate-800 mb-4">Upcoming Deadlines</h2>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="bg-red-50 text-red-600 rounded-lg p-2 flex flex-col items-center justify-center shrink-0 w-12 h-12">
+                                        <span class="text-xs font-bold uppercase">Oct</span>
+                                        <span class="text-lg font-bold leading-none">20</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-800">Grade Midterms (CS501)</p>
+                                        <p class="text-xs text-slate-500 mt-0.5">Due in 2 days</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="bg-slate-100 text-slate-600 rounded-lg p-2 flex flex-col items-center justify-center shrink-0 w-12 h-12">
+                                        <span class="text-xs font-bold uppercase">Oct</span>
+                                        <span class="text-lg font-bold leading-none">25</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-800">Submit Project Topics</p>
+                                        <p class="text-xs text-slate-500 mt-0.5">Due in 7 days</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SCREEN 2: MY COURSES                       -->
+            <!-- ========================================== -->
+            <div id="faculty-courses" class="screen-content max-w-7xl mx-auto space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">My Courses</h1>
+                        <p class="text-slate-500 text-sm">Fall 2024 • Semester 5</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Course 1 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex gap-2">
+                                    <span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded text-xs font-bold">CS501</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-xs font-bold">4 Credits</span>
+                                </div>
+                                <button class="text-slate-400 hover:text-slate-600"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-1">Database Management Systems</h3>
+                            <p class="text-sm text-slate-500 mb-6">Computer Science • Section A</p>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500 mb-1 flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Enrolled</p>
+                                    <p class="font-semibold text-slate-800">60 Students</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500 mb-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Next Class</p>
+                                    <p class="font-semibold text-slate-800 text-sm">Tomorrow, 09:00 AM</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <div class="flex justify-between text-xs font-medium mb-1">
+                                    <span class="text-slate-600">Avg. Attendance</span>
+                                    <span class="text-slate-800">85%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+
+                            <button class="w-full py-2.5 bg-slate-50 hover:bg-primary-50 text-primary-700 text-sm font-semibold rounded-lg border border-slate-200 hover:border-primary-200 transition-colors">
+                                Manage Course
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Course 2 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex gap-2">
+                                    <span class="px-2.5 py-1 bg-purple-50 text-purple-700 rounded text-xs font-bold">CS502</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-xs font-bold">4 Credits</span>
+                                </div>
+                                <button class="text-slate-400 hover:text-slate-600"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-1">Design & Analysis of Algorithms</h3>
+                            <p class="text-sm text-slate-500 mb-6">Computer Science • Section A</p>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500 mb-1 flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Enrolled</p>
+                                    <p class="font-semibold text-slate-800">60 Students</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500 mb-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Next Class</p>
+                                    <p class="font-semibold text-slate-800 text-sm">Today, 11:15 AM</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <div class="flex justify-between text-xs font-medium mb-1">
+                                    <span class="text-slate-600">Avg. Attendance</span>
+                                    <span class="text-slate-800">78%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2">
+                                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 78%"></div>
+                                </div>
+                            </div>
+
+                            <button class="w-full py-2.5 bg-slate-50 hover:bg-primary-50 text-primary-700 text-sm font-semibold rounded-lg border border-slate-200 hover:border-primary-200 transition-colors">
+                                Manage Course
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Course 3 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex gap-2">
+                                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-bold">CS503</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-xs font-bold">3 Credits</span>
+                                </div>
+                                <button class="text-slate-400 hover:text-slate-600"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-1">Cloud Computing</h3>
+                            <p class="text-sm text-slate-500 mb-6">Computer Science (Elective) • Section B</p>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500 mb-1 flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Enrolled</p>
+                                    <p class="font-semibold text-slate-800">45 Students</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500 mb-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Next Class</p>
+                                    <p class="font-semibold text-slate-800 text-sm">Wed, 10:00 AM</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <div class="flex justify-between text-xs font-medium mb-1">
+                                    <span class="text-slate-600">Avg. Attendance</span>
+                                    <span class="text-slate-800">92%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 92%"></div>
+                                </div>
+                            </div>
+
+                            <button class="w-full py-2.5 bg-slate-50 hover:bg-primary-50 text-primary-700 text-sm font-semibold rounded-lg border border-slate-200 hover:border-primary-200 transition-colors">
+                                Manage Course
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Course 4 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex gap-2">
+                                    <span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded text-xs font-bold">CS505</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded text-xs font-bold">2 Credits (Lab)</span>
+                                </div>
+                                <button class="text-slate-400 hover:text-slate-600"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-1">Web Technologies Lab</h3>
+                            <p class="text-sm text-slate-500 mb-6">Computer Science • Batch B1</p>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500 mb-1 flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Enrolled</p>
+                                    <p class="font-semibold text-slate-800">30 Students</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500 mb-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Next Class</p>
+                                    <p class="font-semibold text-slate-800 text-sm">Today, 02:00 PM</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <div class="flex justify-between text-xs font-medium mb-1">
+                                    <span class="text-slate-600">Avg. Attendance</span>
+                                    <span class="text-slate-800">95%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 95%"></div>
+                                </div>
+                            </div>
+
+                            <button class="w-full py-2.5 bg-slate-50 hover:bg-primary-50 text-primary-700 text-sm font-semibold rounded-lg border border-slate-200 hover:border-primary-200 transition-colors">
+                                Manage Course
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SCREEN 3: MARK ATTENDANCE                  -->
+            <!-- ========================================== -->
+            <div id="faculty-attendance" class="screen-content max-w-5xl mx-auto pb-24 relative min-h-full">
+                
+                <h1 class="text-2xl font-bold text-slate-800 mb-6">Mark Attendance</h1>
+
+                <!-- Controls -->
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Course</label>
+                            <select class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-white">
+                                <option>CS501 - Database Systems</option>
+                                <option>CS502 - Algorithms</option>
+                                <option>CS503 - Cloud Computing</option>
+                                <option>CS505 - Web Tech Lab</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Date</label>
+                            <input type="date" value="2024-10-18" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase">Session</label>
+                            <select class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 bg-white">
+                                <option>Morning (09:00 AM - 10:30 AM)</option>
+                                <option>Afternoon (02:00 PM - 04:00 PM)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Bar & Bulk Actions -->
+                <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-100 rounded-t-xl p-4 border border-slate-200 border-b-0 gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium flex items-center gap-2">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i> Hall 302
+                        </div>
+                        <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium flex items-center gap-2">
+                            <i class="w-4 h-4 text-slate-400" data-lucide="users"></i> <span id="total-students-count">15</span> Students
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="btn-all-present" class="px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg text-sm font-semibold transition-colors border border-green-200">
+                            Select All Present
+                        </button>
+                        <button id="btn-all-absent" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-semibold transition-colors border border-red-200">
+                            Select All Absent
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student List -->
+                <div class="bg-white border border-slate-200 rounded-b-xl overflow-hidden shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase w-24">Enr No.</th>
+                                <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Student Name</th>
+                                <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase hidden sm:table-cell">Department</th>
+                                <th class="py-3 px-4 text-xs font-semibold text-slate-500 uppercase text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendance-list" class="divide-y divide-slate-100">
+                            <!-- JS Will generate rows here to keep code DRY -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Sticky Bottom Action Bar -->
+                <div class="fixed bottom-0 left-0 md:left-64 right-0 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-6">
+                        <div class="text-center">
+                            <p class="text-xs font-semibold text-slate-500 uppercase">Present</p>
+                            <p id="counter-present" class="text-xl font-bold text-green-600">0</p>
+                        </div>
+                        <div class="w-px h-8 bg-slate-200"></div>
+                        <div class="text-center">
+                            <p class="text-xs font-semibold text-slate-500 uppercase">Absent</p>
+                            <p id="counter-absent" class="text-xl font-bold text-red-600">0</p>
+                        </div>
+                        <div class="w-px h-8 bg-slate-200"></div>
+                        <div class="text-center">
+                            <p class="text-xs font-semibold text-slate-500 uppercase">Total</p>
+                            <p id="counter-total" class="text-xl font-bold text-slate-800">15</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 w-full sm:w-auto">
+                        <button class="flex-1 sm:flex-none px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold transition-colors">
+                            Save as Draft
+                        </button>
+                        <button id="submit-attendance" class="flex-1 sm:flex-none px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors">
+                            Submit Attendance
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SCREEN 4: ASSIGNMENTS                      -->
+            <!-- ========================================== -->
+            <div id="faculty-assignments" class="screen-content max-w-6xl mx-auto space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h1 class="text-2xl font-bold text-slate-800">Assignments & Projects</h1>
+                    <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Create Assignment
+                    </button>
+                </div>
+
+                <!-- Tabs -->
+                <div class="border-b border-slate-200 flex gap-6">
+                    <button class="px-1 py-3 text-sm font-semibold text-primary-600 border-b-2 border-primary-600">All</button>
+                    <button class="px-1 py-3 text-sm font-semibold text-slate-500 hover:text-slate-700 border-b-2 border-transparent">Active</button>
+                    <button class="px-1 py-3 text-sm font-semibold text-slate-500 hover:text-slate-700 border-b-2 border-transparent">Past Due</button>
+                    <button class="px-1 py-3 text-sm font-semibold text-slate-500 hover:text-slate-700 border-b-2 border-transparent">Graded</button>
+                </div>
+
+                <!-- Assignment List -->
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200">
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Title & Course</th>
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Due Date</th>
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Submissions</th>
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Status</th>
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <!-- item -->
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="py-4 px-6">
+                                        <p class="font-bold text-slate-800 mb-1">ER Diagram Case Study</p>
+                                        <span class="inline-flex px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">CS501</span>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <p class="text-sm text-slate-800">Oct 20, 2024</p>
+                                        <p class="text-xs text-slate-500">11:59 PM</p>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-full bg-slate-200 rounded-full h-1.5 w-24">
+                                                <div class="bg-primary-500 h-1.5 rounded-full" style="width: 80%"></div>
+                                            </div>
+                                            <span class="text-sm font-medium text-slate-700">48/60</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <span class="inline-flex px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-xs font-medium">Active</span>
+                                    </td>
+                                    <td class="py-4 px-6 text-right space-x-2">
+                                        <button class="p-1.5 text-slate-400 hover:text-primary-600 transition-colors" title="View Submissions"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-slate-400 hover:text-slate-800 transition-colors" title="Edit"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- item -->
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="py-4 px-6">
+                                        <p class="font-bold text-slate-800 mb-1">Graph Search Implementation</p>
+                                        <span class="inline-flex px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-bold">CS502</span>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <p class="text-sm text-slate-800">Oct 15, 2024</p>
+                                        <p class="text-xs text-red-500 font-medium">Past Due</p>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-full bg-slate-200 rounded-full h-1.5 w-24">
+                                                <div class="bg-primary-500 h-1.5 rounded-full" style="width: 95%"></div>
+                                            </div>
+                                            <span class="text-sm font-medium text-slate-700">57/60</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <span class="inline-flex px-2.5 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-medium">Needs Grading (12)</span>
+                                    </td>
+                                    <td class="py-4 px-6 text-right space-x-2">
+                                        <button class="p-1.5 text-slate-400 hover:text-primary-600 transition-colors" title="Grade"><i data-lucide="check-circle" class="w-4 h-4"></i></button>
+                                        <button class="p-1.5 text-slate-400 hover:text-slate-800 transition-colors" title="Edit"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SCREEN 5: STUDENTS                         -->
+            <!-- ========================================== -->
+            <div id="faculty-students" class="screen-content max-w-6xl mx-auto space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h1 class="text-2xl font-bold text-slate-800">My Students</h1>
+                    <div class="flex gap-3 w-full sm:w-auto">
+                        <select class="flex-1 sm:flex-none border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-500 bg-white">
+                            <option>All Courses</option>
+                            <option>CS501 - Database Systems</option>
+                            <option>CS502 - Algorithms</option>
+                        </select>
+                        <button class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> Export
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200">
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Student</th>
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Enr No.</th>
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Course</th>
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Attendance</th>
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase">Grade</th>
+                                    <th class="py-4 px-6 text-xs font-semibold text-slate-500 uppercase text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100" id="students-table-body">
+                                <!-- JS Populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SCREEN 6: PROFILE                          -->
+            <!-- ========================================== -->
+            <div id="faculty-profile" class="screen-content max-w-5xl mx-auto space-y-6">
+                <h1 class="text-2xl font-bold text-slate-800">Profile & Settings</h1>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Left: Avatar -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex flex-col items-center text-center">
+                        <div class="relative mb-4 group cursor-pointer">
+                            <img src="https://i.pravatar.cc/150?img=47" alt="Profile" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md">
+                            <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i data-lucide="camera" class="text-white w-8 h-8"></i>
+                            </div>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">Prof. Sarah Jenkins</h2>
+                        <p class="text-sm text-slate-500 mb-4">EMP ID: FAC-2018-042</p>
+                        <span class="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold">Computer Science Dept.</span>
+                    </div>
+
+                    <!-- Right: Details -->
+                    <div class="md:col-span-2 space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                            <h3 class="text-lg font-bold text-slate-800 mb-4">Personal Information</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Full Name</label>
+                                    <input type="text" value="Sarah Jenkins" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Email Address</label>
+                                    <input type="email" value="s.jenkins@eduzy.edu" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Phone Number</label>
+                                    <input type="text" value="+1 (555) 123-4567" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Department</label>
+                                    <input type="text" value="Computer Science" disabled class="w-full border border-slate-200 bg-slate-50 rounded-lg px-3 py-2 text-sm text-slate-500 cursor-not-allowed">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                            <h3 class="text-lg font-bold text-slate-800 mb-4">Academic Details</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Specialization</label>
+                                    <input type="text" value="Database Systems, AI" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Qualification</label>
+                                    <input type="text" value="Ph.D. in Computer Science" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Office Room</label>
+                                    <input type="text" value="Block A, Room 412" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1.5">Office Hours</label>
+                                    <input type="text" value="Mon/Wed 2:00 PM - 4:00 PM" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 flex justify-end gap-3">
+                                <button class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold transition-colors">Discard</button>
+                                <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold transition-colors">Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-24 md:bottom-6 right-6 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+        <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+        <span class="text-sm font-medium" id="toast-msg">Success message</span>
+    </div>
+
+    <!-- Javascript -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Mobile Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const openSidebarBtn = document.getElementById('open-sidebar');
+        const closeSidebarBtn = document.getElementById('close-sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            mobileOverlay.classList.toggle('hidden');
+        }
+
+        openSidebarBtn.addEventListener('click', toggleSidebar);
+        closeSidebarBtn.addEventListener('click', toggleSidebar);
+        mobileOverlay.addEventListener('click', toggleSidebar);
+
+        // Navigation
+        const navItems = document.querySelectorAll('.nav-item');
+        const screens = document.querySelectorAll('.screen-content');
+        const navRedirects = document.querySelectorAll('.nav-redirect');
+
+        function switchScreen(targetId) {
+            // Update active screen
+            screens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            const targetScreen = document.getElementById(targetId);
+            if(targetScreen) targetScreen.classList.add('active');
+
+            // Update nav styles
+            navItems.forEach(item => {
+                if (item.dataset.target === targetId) {
+                    item.classList.add('bg-primary-50', 'text-primary-800', 'border-primary-600');
+                    item.classList.remove('text-slate-600', 'hover:bg-slate-50', 'border-transparent');
+                } else {
+                    item.classList.remove('bg-primary-50', 'text-primary-800', 'border-primary-600');
+                    item.classList.add('text-slate-600', 'hover:bg-slate-50', 'border-transparent');
+                }
+            });
+
+            // Close mobile sidebar on nav
+            if(window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if(item.dataset.target) switchScreen(item.dataset.target);
+            });
+        });
+
+        navRedirects.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(btn.dataset.target) switchScreen(btn.dataset.target);
+            });
+        });
+
+        // Toast logic
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // ----------------------------------------------------
+        // Mock Data & Logic for Attendance & Students
+        // ----------------------------------------------------
+        
+        const mockStudents = [
+            { id: 'CS22001', name: 'Alex Johnson', img: '11', dept: 'Computer Science' },
+            { id: 'CS22002', name: 'Maria Garcia', img: '12', dept: 'Computer Science' },
+            { id: 'CS22003', name: 'James Smith', img: '13', dept: 'Computer Science' },
+            { id: 'CS22004', name: 'Linda Davis', img: '14', dept: 'Computer Science' },
+            { id: 'CS22005', name: 'Robert Wilson', img: '15', dept: 'Computer Science' },
+            { id: 'CS22006', name: 'Patricia Taylor', img: '16', dept: 'Computer Science' },
+            { id: 'CS22007', name: 'John Anderson', img: '17', dept: 'Computer Science' },
+            { id: 'CS22008', name: 'Jennifer Thomas', img: '18', dept: 'Computer Science' },
+            { id: 'CS22009', name: 'Michael Jackson', img: '19', dept: 'Computer Science' },
+            { id: 'CS22010', name: 'Elizabeth White', img: '20', dept: 'Computer Science' },
+            { id: 'CS22011', name: 'William Harris', img: '21', dept: 'Computer Science' },
+            { id: 'CS22012', name: 'Barbara Martin', img: '22', dept: 'Computer Science' },
+            { id: 'CS22013', name: 'Richard Thompson', img: '23', dept: 'Computer Science' },
+            { id: 'CS22014', name: 'Susan Garcia', img: '24', dept: 'Computer Science' },
+            { id: 'CS22015', name: 'Joseph Martinez', img: '25', dept: 'Computer Science' }
+        ];
+
+        // 1. Populate Attendance Table
+        const attendanceList = document.getElementById('attendance-list');
+        const counterPresent = document.getElementById('counter-present');
+        const counterAbsent = document.getElementById('counter-absent');
+        
+        function renderAttendanceTable() {
+            attendanceList.innerHTML = '';
+            mockStudents.forEach((student, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors group';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-mono text-sm text-slate-600">${student.id}</td>
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-3">
+                            <img src="https://i.pravatar.cc/150?img=${student.img}" class="w-8 h-8 rounded-full object-cover shadow-sm">
+                            <span class="font-semibold text-sm text-slate-800">${student.name}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-sm text-slate-500 hidden sm:table-cell">${student.dept}</td>
+                    <td class="py-3 px-4 text-right">
+                        <div class="inline-block relative w-14 align-middle select-none transition duration-200 ease-in cursor-pointer">
+                            <input type="checkbox" name="attendance-${index}" id="toggle-${index}" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-1 transition-all duration-300" checked/>
+                            <label for="toggle-${index}" class="toggle-label block overflow-hidden h-8 rounded-full cursor-pointer transition-colors duration-300"></label>
+                        </div>
+                        <span class="status-text text-xs font-bold w-12 inline-block text-center ml-2 text-green-600">Present</span>
+                    </td>
+                `;
+                attendanceList.appendChild(tr);
+            });
+            updateCounters();
+            attachToggleListeners();
+        }
+
+        function updateCounters() {
+            const checkboxes = document.querySelectorAll('.toggle-checkbox');
+            let p = 0;
+            checkboxes.forEach(cb => {
+                if (cb.checked) p++;
+                const statusText = cb.parentElement.nextElementSibling;
+                if(cb.checked) {
+                    statusText.textContent = 'Present';
+                    statusText.className = 'status-text text-xs font-bold w-12 inline-block text-center ml-2 text-green-600';
+                } else {
+                    statusText.textContent = 'Absent';
+                    statusText.className = 'status-text text-xs font-bold w-12 inline-block text-center ml-2 text-red-600';
+                }
+            });
+            counterPresent.textContent = p;
+            counterAbsent.textContent = mockStudents.length - p;
+        }
+
+        function attachToggleListeners() {
+            const checkboxes = document.querySelectorAll('.toggle-checkbox');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateCounters);
+            });
+        }
+
+        // Bulk Actions
+        document.getElementById('btn-all-present').addEventListener('click', () => {
+            document.querySelectorAll('.toggle-checkbox').forEach(cb => cb.checked = true);
+            updateCounters();
+        });
+        document.getElementById('btn-all-absent').addEventListener('click', () => {
+            document.querySelectorAll('.toggle-checkbox').forEach(cb => cb.checked = false);
+            updateCounters();
+        });
+
+        // Submit Attendance
+        document.getElementById('submit-attendance').addEventListener('click', () => {
+            showToast('Attendance submitted successfully for CS501 - Oct 18, 2024');
+            // Go back to dashboard after a delay
+            setTimeout(() => { switchScreen('faculty-dashboard'); }, 1500);
+        });
+
+        // 2. Populate Students Table
+        const studentsTableBody = document.getElementById('students-table-body');
+        function renderStudentsTable() {
+            studentsTableBody.innerHTML = '';
+            mockStudents.slice(0, 8).forEach(student => {
+                // Randomize some data for display
+                const att = Math.floor(Math.random() * 30) + 70; // 70-100
+                const grade = ['A', 'A-', 'B+', 'B', 'C+'][Math.floor(Math.random() * 5)];
+                const badgeColor = att > 85 ? 'text-green-700 bg-green-50' : (att > 75 ? 'text-yellow-700 bg-yellow-50' : 'text-red-700 bg-red-50');
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="py-3 px-6">
+                        <div class="flex items-center gap-3">
+                            <img src="https://i.pravatar.cc/150?img=${student.img}" class="w-8 h-8 rounded-full">
+                            <span class="font-semibold text-sm text-slate-800">${student.name}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-6 text-sm text-slate-600 font-mono">${student.id}</td>
+                    <td class="py-3 px-6"><span class="inline-flex px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium">CS501</span></td>
+                    <td class="py-3 px-6">
+                        <span class="inline-flex px-2 py-1 rounded-md text-xs font-bold ${badgeColor}">${att}%</span>
+                    </td>
+                    <td class="py-3 px-6 font-bold text-slate-800">${grade}</td>
+                    <td class="py-3 px-6 text-right">
+                        <button class="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors">View Profile</button>
+                    </td>
+                `;
+                studentsTableBody.appendChild(tr);
+            });
+        }
+
+        // Init
+        renderAttendanceTable();
+        renderStudentsTable();
+
+    </script>
+</body>
+</html>
